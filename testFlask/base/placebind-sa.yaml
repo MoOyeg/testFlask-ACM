@@ -1,0 +1,13 @@
+---
+apiVersion: policy.open-cluster-management.io/v1
+kind: PlacementBinding
+metadata:
+  name: binding-policy-sa
+placementRef:
+  name: placement-policy-sa
+  kind: PlacementRule
+  apiGroup: apps.open-cluster-management.io
+subjects:
+- name: policy-serviceaccount
+  kind: Policy
+  apiGroup: policy.open-cluster-management.io
