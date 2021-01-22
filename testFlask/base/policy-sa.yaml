@@ -1,7 +1,7 @@
 apiVersion: policy.open-cluster-management.io/v1
 kind: Policy
 metadata:
-  name: policy-namespace
+  name: policy-sa
   annotations:
     policy.open-cluster-management.io/standards: NIST SP 800-53
     policy.open-cluster-management.io/categories: CM Configuration Management
@@ -14,13 +14,13 @@ spec:
         apiVersion: policy.open-cluster-management.io/v1
         kind: ConfigurationPolicy
         metadata:
-          name: policy-serviceaccount
+          name: policy-sa
         spec:
           remediationAction: inform # the policy-template spec.remediationAction is overridden by the preceding parameter value for spec.remediationAction.
           severity: low
           namespaceSelector:
             exclude: ["kube-*"]
-            include: ["appdev"]
+            include: [""]
           object-templates:
             - complianceType: musthave
               objectDefinition:
