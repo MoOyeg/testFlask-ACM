@@ -1,0 +1,10 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - placebind-namespace.yaml
+  - placebind-sa.yaml
+  - placementrule-namespace.yaml
+  - placementrule-sa.yaml
+  - policy-namespace.yaml
+  - policy-namespace.yaml
