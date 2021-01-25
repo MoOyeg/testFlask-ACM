@@ -2,7 +2,7 @@ apiVersion: builtin
 kind: ValueAddTransformer
 metadata:
   name: namespaceAdd
-value: appdev
+value: appprod
 targets:
 - selector:
     kind: Policy
