@@ -1,11 +1,16 @@
 commonLabels:
-  variant: dev
+  policy-env: dev
+  editor: kustomize
 bases:
   - ../../base
 patchesStrategicMerge:
-  - placebind-namespace.yaml
-  - placebind-sa.yaml
   - placementrule-namespace.yaml
   - placementrule-sa.yaml
-  - policy-namespace.yaml
-  - policy-namespace.yaml
+#  - placebind-namespace.yaml
+#  - placebind-sa.yaml
+#  - placementrule-namespace.yaml
+#  - placementrule-sa.yaml
+#  - policy-namespace.yaml
+#  - policy-namespace.yaml
+transformers:
+  - ./transformers/setvalues-policy.yaml
