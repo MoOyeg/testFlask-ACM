@@ -1,0 +1,10 @@
+commonLabels:
+  policy-env: prod
+  editor: kustomize
+bases:
+  - ../../base
+patchesStrategicMerge:
+  - placementrule-namespace.yaml
+  - placementrule-sa.yaml
+transformers:
+  - ./transformers/setvalues-policy.yaml
