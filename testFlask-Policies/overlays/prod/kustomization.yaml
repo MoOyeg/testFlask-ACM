@@ -1,5 +1,5 @@
 commonLabels:
-  policy-env: dev
+  policy-env: prod
   editor: kustomize
 bases:
   - ../../base

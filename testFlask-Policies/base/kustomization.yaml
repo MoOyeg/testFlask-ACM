@@ -7,4 +7,4 @@ resources:
   - placementrule-namespace.yaml
   - placementrule-sa.yaml
   - policy-namespace.yaml
-  - policy-namespace.yaml
+  - policy-sa.yaml

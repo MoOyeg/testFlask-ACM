@@ -1,0 +1,24 @@
+apiVersion: builtin
+kind: ValueAddTransformer
+metadata:
+  name: namespaceAdd
+value: appprod
+targets:
+- selector:
+    kind: Policy
+  fieldPath: spec/policy-templates/0/objectDefinition/spec/namespaceSelector/include/0/
+- selector:
+    kind: Policy
+  fieldPath: spec/policy-templates/0/objectDefinition/spec/object-templates/0/objectDefinition/metadata/name
+- selector:
+    kind: Policy
+    name: policy-sa
+  fieldPath: metadata/namespace
+- selector:
+    kind: PlacementBinding
+  fieldPath: metadata/namespace
+- selector:
+    kind: PlacementRule
+  fieldPath: metadata/namespace
+
+
