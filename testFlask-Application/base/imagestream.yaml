@@ -1,0 +1,19 @@
+apiVersion: image.openshift.io/v1
+kind: ImageStream
+metadata:
+  labels:
+    app: testflask
+  name: testflask
+  namespace: appprod
+spec:
+  lookupPolicy:
+    local: false
+status:
+  dockerImageRepository: image-registry.openshift-image-registry.svc:5000/appprod/testflask
+  tags:
+    - items:
+        - created: "2021-03-17T03:45:15Z"
+          dockerImageReference: image-registry.openshift-image-registry.svc:5000/appprod/testflask@sha256:965c8758485e3a7dc8f6b1426de025ccf19229fb2af8790ff0e875e475000ede
+          generation: 1
+          image: sha256:965c8758485e3a7dc8f6b1426de025ccf19229fb2af8790ff0e875e475000ede
+      tag: latest

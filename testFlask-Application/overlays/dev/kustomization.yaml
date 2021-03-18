@@ -4,7 +4,4 @@ commonLabels:
 bases:
   - ../../base
 patchesStrategicMerge:
-  - placementrule-namespace.yaml
-  - placementrule-sa.yaml
-transformers:
-  - ./transformers/setvalues-policy.yaml
+  - patch-dc.yaml

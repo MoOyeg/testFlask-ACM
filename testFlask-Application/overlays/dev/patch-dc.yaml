@@ -1,0 +1,63 @@
+kind: DeploymentConfig
+apiVersion: apps.openshift.io/v1
+metadata:
+  annotations:
+    app.openshift.io/connects-to: mysql
+  name: testflask
+  namespace: appdev
+  labels:
+    app: testflask
+    app.kubernetes.io/part-of: testflask
+spec:
+  triggers:
+    - type: ConfigChange
+    - type: ImageChange
+      imageChangeParams:
+        automatic: true
+        containerNames:
+          - testflask
+        from:
+          kind: ImageStreamTag
+          namespace: apppdev
+          name: "testflask:latest"
+  template:
+    metadata:
+      labels:
+        app: testflask
+        deploymentconfig: testflask
+    spec:
+      containers:
+        - name: testflask
+          image: >-
+            image-registry.openshift-image-registry.svc:5000/appprod/testflask
+          ports:
+            - containerPort: 8080
+              protocol: TCP
+          env:
+            - name: APP_CONFIG
+              value: gunicorn.conf.py
+            - name: APP_MODULE
+              value: "testapp:app"
+            - name: MYSQL_DATABASE
+              value: testdb
+            - name: MYSQL_HOST
+              value: mysql
+            - name: MYSQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: my-secret
+                  key: MYSQL_PASSWORD
+            - name: MYSQL_USER
+              valueFrom:
+                secretKeyRef:
+                  name: my-secret
+                  key: MYSQL_USER
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          imagePullPolicy: Always
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 30
+      dnsPolicy: ClusterFirst
+      securityContext: {}
+      schedulerName: default-scheduler
