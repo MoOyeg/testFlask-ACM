@@ -4,7 +4,6 @@ metadata:
   annotations:
     app.openshift.io/connects-to: mysql
   name: testflask
-  namespace: appprod
   labels:
     app: testflask
     app.kubernetes.io/part-of: testflask

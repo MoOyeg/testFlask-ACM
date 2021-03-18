@@ -1,0 +1,9 @@
+apiVersion: project.openshift.io/v1
+kind: Namespace
+metadata:
+  annotations:
+    openshift.io/description: "TestFlask Dev Application"
+    openshift.io/display-name: "AppDev"
+  name: appdev
+spec: {}
+
