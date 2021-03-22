@@ -3,8 +3,6 @@ commonLabels:
   editor: kustomize
 bases:
   - ../../base
-resources:
-  - namespace.yaml
 patchesStrategicMerge:
   - patch-dc.yaml
   - patch-is.yaml
