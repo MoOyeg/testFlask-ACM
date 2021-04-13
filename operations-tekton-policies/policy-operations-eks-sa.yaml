@@ -1,0 +1,57 @@
+apiVersion: policy.open-cluster-management.io/v1
+kind: Policy
+metadata:
+  name: policy-operations-sa
+  namespace: cluster-policies
+  annotations:
+    apps.open-cluster-management.io/reconcile-option: merge
+  generation: 1
+spec:
+  disabled: false
+  policy-templates:
+    - objectDefinition:
+        apiVersion: policy.open-cluster-management.io/v1
+        kind: ConfigurationPolicy
+        metadata:
+          name: policy-operations-sa
+        spec:
+          namespaceSelector:
+            exclude:
+              - kube-*
+            include:
+              - "*"
+          object-templates:
+            - complianceType: musthave
+              objectDefinition:
+                apiVersion: v1
+                kind: ServiceAccount
+                metadata:
+                  name: eks-admin
+                  namespace: kube-system
+          remediationAction: enforce
+          severity: high
+  remediationAction: enforce
+---
+apiVersion: policy.open-cluster-management.io/v1
+kind: PlacementBinding
+metadata:
+  name: binding-policy-operations-sa
+  namespace: cluster-policies
+placementRef:
+  name: placementrule-operations-eks
+  kind: PlacementRule
+  apiGroup: apps.open-cluster-management.io
+subjects:
+  - name: policy-operations-sa
+    kind: Policy
+    apiGroup: policy.open-cluster-management.io
+---
+apiVersion: apps.open-cluster-management.io/v1
+kind: PlacementRule
+metadata:
+  name: placementrule-operations-eks
+  namespace: cluster-policies
+spec:
+  clusterSelector:
+    matchLabels:
+      vendor: EKS

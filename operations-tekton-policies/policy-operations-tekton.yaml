@@ -1,0 +1,80 @@
+apiVersion: policy.open-cluster-management.io/v1
+kind: Policy
+metadata:
+  name: policy-operatorhub-tekton
+  namespace: cluster-policies
+  annotations:
+    apps.open-cluster-management.io/reconcile-option: merge
+  generation: 1
+spec:
+  disabled: false
+  policy-templates:
+    - objectDefinition:
+        apiVersion: policy.open-cluster-management.io/v1
+        kind: ConfigurationPolicy
+        metadata:
+          name: policy-operatorhub-tekton
+        spec:
+          namespaceSelector:
+            exclude:
+              - kube-*
+            include:
+              - "*"
+          object-templates:
+            - complianceType: musthave
+              objectDefinition:
+                apiVersion: apps/v1
+                kind: Deployment
+                metadata:
+                  name: operations-bootstrap-agent
+                  namespace: operations-bootstrap
+                spec:
+                  selector:
+                    matchLabels:
+                      app: operations-bootstrap
+                  template:
+                    metadata:
+                      labels:
+                        app: operations-bootstrap
+                    spec:
+                      containers:
+                          - name: operations-bootstrap-agent
+                            image: quay.io/mooyeg/oc-cli:1.0         
+                            command: 
+                              - bin/bash
+                              - -c
+                              - |
+                                echo "Installing OperatorHub"
+                                curl -sL https://github.com/operator-framework/operator-lifecycle-manager/releases/download/v0.17.0/install.sh | bash -s v0.17.0
+                                echo "Installing Tekton Operator"
+                                kubectl create -f https://operatorhub.io/install/tektoncd-operator.yaml
+                                echo "Installing Tekton Dashboard"
+                                kubectl apply --filename https://storage.googleapis.com/tekton-releases/dashboard/latest/tekton-dashboard-release.yaml
+                                sleep infinity
+          remediationAction: enforce
+          severity: high
+  remediationAction: enforce
+---
+apiVersion: policy.open-cluster-management.io/v1
+kind: PlacementBinding
+metadata:
+  name: binding-policy-operatorhub-tekton
+  namespace: cluster-policies
+placementRef:
+  name: placementrule-kubernetes
+  kind: PlacementRule
+  apiGroup: apps.open-cluster-management.io
+subjects:
+  - name: policy-operatorhub-tekton
+    kind: Policy
+    apiGroup: policy.open-cluster-management.io
+---
+apiVersion: apps.open-cluster-management.io/v1
+kind: PlacementRule
+metadata:
+  name: placementrule-kubernetes
+  namespace: cluster-policies
+spec:
+  clusterSelector:
+    matchLabels:
+      vendor: EKS
