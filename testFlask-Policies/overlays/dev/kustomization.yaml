@@ -8,3 +8,4 @@ patchesStrategicMerge:
   - placementrule-sa.yaml
 transformers:
   - ./transformers/setvalues-policy.yaml
+namespace: default
