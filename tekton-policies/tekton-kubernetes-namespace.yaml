@@ -1,0 +1,59 @@
+apiVersion: policy.open-cluster-management.io/v1
+kind: Policy
+metadata:
+  name: policy-tekton-kubernetes-namespace
+  namespace: cluster-policies
+  annotations:
+    apps.open-cluster-management.io/reconcile-option: merge
+  generation: 1
+spec:
+  disabled: false
+  policy-templates:
+    - objectDefinition:
+        apiVersion: policy.open-cluster-management.io/v1
+        kind: ConfigurationPolicy
+        metadata:
+          name: policy-tekton-kubernetes-namespace
+        spec:
+          namespaceSelector:
+            exclude:
+              - kube-*
+            include:
+              - "*"
+          object-templates:
+            - complianceType: musthave
+              objectDefinition:
+                apiVersion: v1
+                kind: Namespace
+                metadata:
+                  name: tekton-pipelines
+                  labels:
+                    app.kubernetes.io/instance: default
+                    app.kubernetes.io/part-of: tekton-pipelines
+          remediationAction: enforce
+          severity: high
+  remediationAction: enforce
+---
+apiVersion: policy.open-cluster-management.io/v1
+kind: PlacementBinding
+metadata:
+  name: binding-tekton-kubernetes-namespace
+  namespace: cluster-policies
+placementRef:
+  name: placementrule-kubernetes
+  kind: PlacementRule
+  apiGroup: apps.open-cluster-management.io
+subjects:
+  - name: policy-tekton-kubernetes-namespace
+    kind: Policy
+    apiGroup: policy.open-cluster-management.io
+---
+apiVersion: apps.open-cluster-management.io/v1
+kind: PlacementRule
+metadata:
+  name: placementrule-kubernetes
+  namespace: cluster-policies
+spec:
+  clusterSelector:
+    matchLabels:
+      vendor: EKS

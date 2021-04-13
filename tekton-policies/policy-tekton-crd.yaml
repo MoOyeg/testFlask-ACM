@@ -1,0 +1,653 @@
+apiVersion: policy.open-cluster-management.io/v1
+kind: Policy
+metadata:
+  name: policy-tekton-crd-create
+  namespace: cluster-policies
+  annotations:
+    apps.open-cluster-management.io/reconcile-option: merge
+  generation: 1
+spec:
+  disabled: false
+  policy-templates:
+    - objectDefinition:
+        apiVersion: policy.open-cluster-management.io/v1
+        kind: ConfigurationPolicy
+        metadata:
+          name: policy-crd-clustertasks-tekton
+        spec:
+          namespaceSelector:
+            exclude:
+              - kube-*
+            include:
+              - "*"
+          object-templates:
+            - complianceType: musthave
+              objectDefinition:
+                apiVersion: apiextensions.k8s.io/v1
+                kind: CustomResourceDefinition
+                metadata:
+                  name: clustertasks.tekton.dev
+                  labels:
+                    app.kubernetes.io/instance: default
+                    app.kubernetes.io/part-of: tekton-pipelines
+                    pipeline.tekton.dev/release: "v0.23.0"
+                    version: "v0.23.0"
+                spec:
+                  group: tekton.dev
+                  preserveUnknownFields: false
+                  versions:
+                    - name: v1alpha1
+                      served: true
+                      storage: false
+                      schema:
+                        openAPIV3Schema:
+                          type: object
+                          # One can use x-kubernetes-preserve-unknown-fields: true
+                          # at the root of the schema (and inside any properties, additionalProperties)
+                          # to get the traditional CRD behaviour that nothing is pruned, despite
+                          # setting spec.preserveUnknownProperties: false.
+                          #
+                          # See https://kubernetes.io/blog/2019/06/20/crd-structural-schema/
+                          # See issue: https://github.com/knative/serving/issues/912
+                          x-kubernetes-preserve-unknown-fields: true
+                      # Opt into the status subresource so metadata.generation
+                      # starts to increment
+                      subresources:
+                        status: {}
+                    - name: v1beta1
+                      served: true
+                      storage: true
+                      schema:
+                        openAPIV3Schema:
+                          type: object
+                          # One can use x-kubernetes-preserve-unknown-fields: true
+                          # at the root of the schema (and inside any properties, additionalProperties)
+                          # to get the traditional CRD behaviour that nothing is pruned, despite
+                          # setting spec.preserveUnknownProperties: false.
+                          #
+                          # See https://kubernetes.io/blog/2019/06/20/crd-structural-schema/
+                          # See issue: https://github.com/knative/serving/issues/912
+                          x-kubernetes-preserve-unknown-fields: true
+                      # Opt into the status subresource so metadata.generation
+                      # starts to increment
+                      subresources:
+                        status: {}
+                  names:
+                    kind: ClusterTask
+                    plural: clustertasks
+                    categories:
+                      - tekton
+                      - tekton-pipelines
+                  scope: Cluster
+                  conversion:
+                    strategy: Webhook
+                    webhook:
+                      conversionReviewVersions: ["v1beta1"]
+                      clientConfig:
+                        service:
+                          name: tekton-pipelines-webhook
+                          namespace: tekton-pipelines
+          remediationAction: enforce
+          severity: high
+    - objectDefinition:
+        apiVersion: policy.open-cluster-management.io/v1
+        kind: ConfigurationPolicy
+        metadata:
+          name: policy-crd-conditions-tekton
+        spec:
+          namespaceSelector:
+            exclude:
+              - kube-*
+            include:
+              - "*"
+          object-templates:
+            - complianceType: musthave
+              objectDefinition:
+                apiVersion: apiextensions.k8s.io/v1
+                kind: CustomResourceDefinition
+                metadata:
+                  name: conditions.tekton.dev
+                  labels:
+                    app.kubernetes.io/instance: default
+                    app.kubernetes.io/part-of: tekton-pipelines
+                    pipeline.tekton.dev/release: "v0.23.0"
+                    version: "v0.23.0"
+                spec:
+                  group: tekton.dev
+                  versions:
+                    - name: v1alpha1
+                      served: true
+                      storage: true
+                      schema:
+                        openAPIV3Schema:
+                          type: object
+                          # One can use x-kubernetes-preserve-unknown-fields: true
+                          # at the root of the schema (and inside any properties, additionalProperties)
+                          # to get the traditional CRD behaviour that nothing is pruned, despite
+                          # setting spec.preserveUnknownProperties: false.
+                          #
+                          # See https://kubernetes.io/blog/2019/06/20/crd-structural-schema/
+                          # See issue: https://github.com/knative/serving/issues/912
+                          x-kubernetes-preserve-unknown-fields: true
+                      # Opt into the status subresource so metadata.generation
+                      # starts to increment
+                      subresources:
+                        status: {}
+                  names:
+                    kind: Condition
+                    plural: conditions
+                    categories:
+                      - tekton
+                      - tekton-pipelines
+                  scope: Namespaced
+          remediationAction: enforce
+          severity: high
+    - objectDefinition:
+        apiVersion: policy.open-cluster-management.io/v1
+        kind: ConfigurationPolicy
+        metadata:
+          name: policy-crd-pipelines-tekton
+        spec:
+          namespaceSelector:
+            exclude:
+              - kube-*
+            include:
+              - "*"
+          object-templates:
+            - complianceType: musthave
+              objectDefinition:
+                apiVersion: apiextensions.k8s.io/v1
+                kind: CustomResourceDefinition
+                metadata:
+                  name: pipelines.tekton.dev
+                  labels:
+                    app.kubernetes.io/instance: default
+                    app.kubernetes.io/part-of: tekton-pipelines
+                    pipeline.tekton.dev/release: "v0.23.0"
+                    version: "v0.23.0"
+                spec:
+                  group: tekton.dev
+                  preserveUnknownFields: false
+                  versions:
+                    - name: v1alpha1
+                      served: true
+                      storage: false
+                      # Opt into the status subresource so metadata.generation
+                      # starts to increment
+                      subresources:
+                        status: {}
+                      schema:
+                        openAPIV3Schema:
+                          type: object
+                          # One can use x-kubernetes-preserve-unknown-fields: true
+                          # at the root of the schema (and inside any properties, additionalProperties)
+                          # to get the traditional CRD behaviour that nothing is pruned, despite
+                          # setting spec.preserveUnknownProperties: false.
+                          #
+                          # See https://kubernetes.io/blog/2019/06/20/crd-structural-schema/
+                          # See issue: https://github.com/knative/serving/issues/912
+                          x-kubernetes-preserve-unknown-fields: true
+                    - name: v1beta1
+                      served: true
+                      storage: true
+                      # Opt into the status subresource so metadata.generation
+                      # starts to increment
+                      subresources:
+                        status: {}
+                      schema:
+                        openAPIV3Schema:
+                          type: object
+                          # One can use x-kubernetes-preserve-unknown-fields: true
+                          # at the root of the schema (and inside any properties, additionalProperties)
+                          # to get the traditional CRD behaviour that nothing is pruned, despite
+                          # setting spec.preserveUnknownProperties: false.
+                          #
+                          # See https://kubernetes.io/blog/2019/06/20/crd-structural-schema/
+                          # See issue: https://github.com/knative/serving/issues/912
+                          x-kubernetes-preserve-unknown-fields: true
+                  names:
+                    kind: Pipeline
+                    plural: pipelines
+                    categories:
+                      - tekton
+                      - tekton-pipelines
+                  scope: Namespaced
+                  conversion:
+                    strategy: Webhook
+                    webhook:
+                      conversionReviewVersions: ["v1beta1"]
+                      clientConfig:
+                        service:
+                          name: tekton-pipelines-webhook
+                          namespace: tekton-pipelines
+    - objectDefinition:
+        apiVersion: policy.open-cluster-management.io/v1
+        kind: ConfigurationPolicy
+        metadata:
+          name: policy-crd-pipelineruns-tekton
+        spec:
+          namespaceSelector:
+            exclude:
+              - kube-*
+            include:
+              - "*"
+          object-templates:
+            - complianceType: musthave
+              objectDefinition:
+                apiVersion: apiextensions.k8s.io/v1
+                kind: CustomResourceDefinition
+                metadata:
+                  name: pipelineruns.tekton.dev
+                  labels:
+                    app.kubernetes.io/instance: default
+                    app.kubernetes.io/part-of: tekton-pipelines
+                    pipeline.tekton.dev/release: "v0.23.0"
+                    version: "v0.23.0"
+                spec:
+                  group: tekton.dev
+                  preserveUnknownFields: false
+                  versions:
+                    - name: v1alpha1
+                      served: true
+                      storage: false
+                      schema:
+                        openAPIV3Schema:
+                          type: object
+                          # One can use x-kubernetes-preserve-unknown-fields: true
+                          # at the root of the schema (and inside any properties, additionalProperties)
+                          # to get the traditional CRD behaviour that nothing is pruned, despite
+                          # setting spec.preserveUnknownProperties: false.
+                          #
+                          # See https://kubernetes.io/blog/2019/06/20/crd-structural-schema/
+                          # See issue: https://github.com/knative/serving/issues/912
+                          x-kubernetes-preserve-unknown-fields: true
+                      additionalPrinterColumns:
+                        - name: Succeeded
+                          type: string
+                          jsonPath: '.status.conditions[?(@.type=="Succeeded")].status'
+                        - name: Reason
+                          type: string
+                          jsonPath: '.status.conditions[?(@.type=="Succeeded")].reason'
+                        - name: StartTime
+                          type: date
+                          jsonPath: .status.startTime
+                        - name: CompletionTime
+                          type: date
+                          jsonPath: .status.completionTime
+                      # Opt into the status subresource so metadata.generation
+                      # starts to increment
+                      subresources:
+                        status: {}
+                    - name: v1beta1
+                      served: true
+                      storage: true
+                      schema:
+                        openAPIV3Schema:
+                          type: object
+                          # One can use x-kubernetes-preserve-unknown-fields: true
+                          # at the root of the schema (and inside any properties, additionalProperties)
+                          # to get the traditional CRD behaviour that nothing is pruned, despite
+                          # setting spec.preserveUnknownProperties: false.
+                          #
+                          # See https://kubernetes.io/blog/2019/06/20/crd-structural-schema/
+                          # See issue: https://github.com/knative/serving/issues/912
+                          x-kubernetes-preserve-unknown-fields: true
+                      additionalPrinterColumns:
+                        - name: Succeeded
+                          type: string
+                          jsonPath: '.status.conditions[?(@.type=="Succeeded")].status'
+                        - name: Reason
+                          type: string
+                          jsonPath: '.status.conditions[?(@.type=="Succeeded")].reason'
+                        - name: StartTime
+                          type: date
+                          jsonPath: .status.startTime
+                        - name: CompletionTime
+                          type: date
+                          jsonPath: .status.completionTime
+                      # Opt into the status subresource so metadata.generation
+                      # starts to increment
+                      subresources:
+                        status: {}
+                  names:
+                    kind: PipelineRun
+                    plural: pipelineruns
+                    categories:
+                      - tekton
+                      - tekton-pipelines
+                    shortNames:
+                      - pr
+                      - prs
+                  scope: Namespaced
+                  conversion:
+                    strategy: Webhook
+                    webhook:
+                      conversionReviewVersions: ["v1beta1"]
+                      clientConfig:
+                        service:
+                          name: tekton-pipelines-webhook
+                          namespace: tekton-pipelines
+    - objectDefinition:
+        apiVersion: policy.open-cluster-management.io/v1
+        kind: ConfigurationPolicy
+        metadata:
+          name: policy-crd-pipelineresources-tekton
+        spec:
+          namespaceSelector:
+            exclude:
+              - kube-*
+            include:
+              - "*"
+          object-templates:
+            - complianceType: musthave
+              objectDefinition:
+                apiVersion: apiextensions.k8s.io/v1
+                kind: CustomResourceDefinition
+                metadata:
+                  name: pipelineresources.tekton.dev
+                  labels:
+                    app.kubernetes.io/instance: default
+                    app.kubernetes.io/part-of: tekton-pipelines
+                    pipeline.tekton.dev/release: "v0.23.0"
+                    version: "v0.23.0"
+                spec:
+                  group: tekton.dev
+                  versions:
+                    - name: v1alpha1
+                      served: true
+                      storage: true
+                      schema:
+                        openAPIV3Schema:
+                          type: object
+                          # One can use x-kubernetes-preserve-unknown-fields: true
+                          # at the root of the schema (and inside any properties, additionalProperties)
+                          # to get the traditional CRD behaviour that nothing is pruned, despite
+                          # setting spec.preserveUnknownProperties: false.
+                          #
+                          # See https://kubernetes.io/blog/2019/06/20/crd-structural-schema/
+                          # See issue: https://github.com/knative/serving/issues/912
+                          x-kubernetes-preserve-unknown-fields: true
+                      # Opt into the status subresource so metadata.generation
+                      # starts to increment
+                      subresources:
+                        status: {}
+                  names:
+                    kind: PipelineResource
+                    plural: pipelineresources
+                    categories:
+                      - tekton
+                      - tekton-pipelines
+                  scope: Namespaced
+          remediationAction: enforce
+          severity: high
+    - objectDefinition:
+        apiVersion: policy.open-cluster-management.io/v1
+        kind: ConfigurationPolicy
+        metadata:
+          name: policy-crd-run-tekton
+        spec:
+          namespaceSelector:
+            exclude:
+              - kube-*
+            include:
+              - "*"
+          object-templates:
+            - complianceType: musthave
+              objectDefinition:
+                apiVersion: apiextensions.k8s.io/v1
+                kind: CustomResourceDefinition
+                metadata:
+                  name: runs.tekton.dev
+                  labels:
+                    app.kubernetes.io/instance: default
+                    app.kubernetes.io/part-of: tekton-pipelines
+                    pipeline.tekton.dev/release: "v0.23.0"
+                    version: "v0.23.0"
+                spec:
+                  group: tekton.dev
+                  preserveUnknownFields: false
+                  versions:
+                    - name: v1alpha1
+                      served: true
+                      storage: true
+                      schema:
+                        openAPIV3Schema:
+                          type: object
+                          # One can use x-kubernetes-preserve-unknown-fields: true
+                          # at the root of the schema (and inside any properties, additionalProperties)
+                          # to get the traditional CRD behaviour that nothing is pruned, despite
+                          # setting spec.preserveUnknownProperties: false.
+                          #
+                          # See https://kubernetes.io/blog/2019/06/20/crd-structural-schema/
+                          # See issue: https://github.com/knative/serving/issues/912
+                          x-kubernetes-preserve-unknown-fields: true
+                      additionalPrinterColumns:
+                        - name: Succeeded
+                          type: string
+                          jsonPath: '.status.conditions[?(@.type=="Succeeded")].status'
+                        - name: Reason
+                          type: string
+                          jsonPath: '.status.conditions[?(@.type=="Succeeded")].reason'
+                        - name: StartTime
+                          type: date
+                          jsonPath: .status.startTime
+                        - name: CompletionTime
+                          type: date
+                          jsonPath: .status.completionTime
+                      # Opt into the status subresource so metadata.generation
+                      # starts to increment
+                      subresources:
+                        status: {}
+                  names:
+                    kind: Run
+                    plural: runs
+                    categories:
+                      - tekton
+                      - tekton-pipelines
+                  scope: Namespaced
+          remediationAction: enforce
+          severity: high
+    - objectDefinition:
+        apiVersion: policy.open-cluster-management.io/v1
+        kind: ConfigurationPolicy
+        metadata:
+          name: policy-crd-tasks-tekton
+        spec:
+          namespaceSelector:
+            exclude:
+              - kube-*
+            include:
+              - "*"
+          object-templates:
+            - complianceType: musthave
+              objectDefinition:
+                apiVersion: apiextensions.k8s.io/v1
+                kind: CustomResourceDefinition
+                metadata:
+                  name: tasks.tekton.dev
+                  labels:
+                    app.kubernetes.io/instance: default
+                    app.kubernetes.io/part-of: tekton-pipelines
+                    pipeline.tekton.dev/release: "v0.23.0"
+                    version: "v0.23.0"
+                spec:
+                  group: tekton.dev
+                  preserveUnknownFields: false
+                  versions:
+                    - name: v1alpha1
+                      served: true
+                      storage: false
+                      schema:
+                        openAPIV3Schema:
+                          type: object
+                          # One can use x-kubernetes-preserve-unknown-fields: true
+                          # at the root of the schema (and inside any properties, additionalProperties)
+                          # to get the traditional CRD behaviour that nothing is pruned, despite
+                          # setting spec.preserveUnknownProperties: false.
+                          #
+                          # See https://kubernetes.io/blog/2019/06/20/crd-structural-schema/
+                          # See issue: https://github.com/knative/serving/issues/912
+                          x-kubernetes-preserve-unknown-fields: true
+                      # Opt into the status subresource so metadata.generation
+                      # starts to increment
+                      subresources:
+                        status: {}
+                    - name: v1beta1
+                      served: true
+                      storage: true
+                      schema:
+                        openAPIV3Schema:
+                          type: object
+                          # One can use x-kubernetes-preserve-unknown-fields: true
+                          # at the root of the schema (and inside any properties, additionalProperties)
+                          # to get the traditional CRD behaviour that nothing is pruned, despite
+                          # setting spec.preserveUnknownProperties: false.
+                          #
+                          # See https://kubernetes.io/blog/2019/06/20/crd-structural-schema/
+                          # See issue: https://github.com/knative/serving/issues/912
+                          x-kubernetes-preserve-unknown-fields: true
+                      # Opt into the status subresource so metadata.generation
+                      # starts to increment
+                      subresources:
+                        status: {}
+                  names:
+                    kind: Task
+                    plural: tasks
+                    categories:
+                      - tekton
+                      - tekton-pipelines
+                  scope: Namespaced
+                  conversion:
+                    strategy: Webhook
+                    webhook:
+                      conversionReviewVersions: ["v1beta1"]
+                      clientConfig:
+                        service:
+                          name: tekton-pipelines-webhook
+                          namespace: tekton-pipelines
+          remediationAction: enforce
+          severity: high
+    - objectDefinition:
+        apiVersion: policy.open-cluster-management.io/v1
+        kind: ConfigurationPolicy
+        metadata:
+          name: policy-crd-taskrun-tekton
+        spec:
+          namespaceSelector:
+            exclude:
+              - kube-*
+            include:
+              - "*"
+          object-templates:
+            - complianceType: musthave
+              objectDefinition:
+                apiVersion: apiextensions.k8s.io/v1
+                kind: CustomResourceDefinition
+                metadata:
+                  name: taskruns.tekton.dev
+                  labels:
+                    app.kubernetes.io/instance: default
+                    app.kubernetes.io/part-of: tekton-pipelines
+                    pipeline.tekton.dev/release: "v0.23.0"
+                    version: "v0.23.0"
+                spec:
+                  group: tekton.dev
+                  preserveUnknownFields: false
+                  versions:
+                    - name: v1alpha1
+                      served: true
+                      storage: false
+                      schema:
+                        openAPIV3Schema:
+                          type: object
+                          # One can use x-kubernetes-preserve-unknown-fields: true
+                          # at the root of the schema (and inside any properties, additionalProperties)
+                          # to get the traditional CRD behaviour that nothing is pruned, despite
+                          # setting spec.preserveUnknownProperties: false.
+                          #
+                          # See https://kubernetes.io/blog/2019/06/20/crd-structural-schema/
+                          # See issue: https://github.com/knative/serving/issues/912
+                          x-kubernetes-preserve-unknown-fields: true
+                      additionalPrinterColumns:
+                        - name: Succeeded
+                          type: string
+                          jsonPath: '.status.conditions[?(@.type=="Succeeded")].status'
+                        - name: Reason
+                          type: string
+                          jsonPath: '.status.conditions[?(@.type=="Succeeded")].reason'
+                        - name: StartTime
+                          type: date
+                          jsonPath: .status.startTime
+                        - name: CompletionTime
+                          type: date
+                          jsonPath: .status.completionTime
+                      # Opt into the status subresource so metadata.generation
+                      # starts to increment
+                      subresources:
+                        status: {}
+                    - name: v1beta1
+                      served: true
+                      storage: true
+                      schema:
+                        openAPIV3Schema:
+                          type: object
+                          # One can use x-kubernetes-preserve-unknown-fields: true
+                          # at the root of the schema (and inside any properties, additionalProperties)
+                          # to get the traditional CRD behaviour that nothing is pruned, despite
+                          # setting spec.preserveUnknownProperties: false.
+                          #
+                          # See https://kubernetes.io/blog/2019/06/20/crd-structural-schema/
+                          # See issue: https://github.com/knative/serving/issues/912
+                          x-kubernetes-preserve-unknown-fields: true
+                      additionalPrinterColumns:
+                        - name: Succeeded
+                          type: string
+                          jsonPath: '.status.conditions[?(@.type=="Succeeded")].status'
+                        - name: Reason
+                          type: string
+                          jsonPath: '.status.conditions[?(@.type=="Succeeded")].reason'
+                        - name: StartTime
+                          type: date
+                          jsonPath: .status.startTime
+                        - name: CompletionTime
+                          type: date
+                          jsonPath: .status.completionTime
+                      # Opt into the status subresource so metadata.generation
+                      # starts to increment
+                      subresources:
+                        status: {}
+                  names:
+                    kind: TaskRun
+                    plural: taskruns
+                    categories:
+                      - tekton
+                      - tekton-pipelines
+                    shortNames:
+                      - tr
+                      - trs
+                  scope: Namespaced
+                  conversion:
+                    strategy: Webhook
+                    webhook:
+                      conversionReviewVersions: ["v1beta1"]
+                      clientConfig:
+                        service:
+                          name: tekton-pipelines-webhook
+                          namespace: tekton-pipelines
+          remediationAction: enforce
+          severity: high
+  remediationAction: enforce
+---
+apiVersion: policy.open-cluster-management.io/v1
+kind: PlacementBinding
+metadata:
+  name: binding-tekton-crd-create
+  namespace: cluster-policies
+placementRef:
+  name: placementrule-kubernetes
+  kind: PlacementRule
+  apiGroup: apps.open-cluster-management.io
+subjects:
+  - name: policy-tekton-crd-create
+    kind: Policy
+    apiGroup: policy.open-cluster-management.io

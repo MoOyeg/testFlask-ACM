@@ -1,0 +1,9 @@
+apiVersion: apps.open-cluster-management.io/v1
+kind: PlacementRule
+metadata:
+  name: placementrule-kubernetes
+  namespace: cluster-policies
+spec:
+  clusterSelector:
+    matchLabels:
+      vendor: EKS

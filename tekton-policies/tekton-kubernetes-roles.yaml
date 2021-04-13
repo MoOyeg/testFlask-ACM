@@ -1,0 +1,163 @@
+apiVersion: policy.open-cluster-management.io/v1
+kind: Policy
+metadata:
+  name: policy-tekton-roles
+  namespace: cluster-policies
+  annotations:
+    apps.open-cluster-management.io/reconcile-option: merge
+  generation: 1
+spec:
+  disabled: false
+  policy-templates:
+    - objectDefinition:
+        apiVersion: policy.open-cluster-management.io/v1
+        kind: ConfigurationPolicy
+        metadata:
+          name: policy-role-tekton-pipelines-controller
+        spec:
+          namespaceSelector:
+            exclude:
+              - kube-*
+            include:
+              - "*"
+          object-templates:
+            - complianceType: musthave
+              objectDefinition:
+                kind: Role
+                apiVersion: rbac.authorization.k8s.io/v1
+                metadata:
+                  name: tekton-pipelines-controller
+                  namespace: tekton-pipelines
+                  labels:
+                    app.kubernetes.io/component: controller
+                    app.kubernetes.io/instance: default
+                    app.kubernetes.io/part-of: tekton-pipelines
+                rules:
+                  - apiGroups: [""]
+                    resources: ["configmaps"]
+                    verbs: ["list", "watch"]
+                  # The controller needs access to these configmaps for logging information and runtime configuration.
+                  - apiGroups: [""]
+                    resources: ["configmaps"]
+                    verbs: ["get"]
+                    resourceNames:
+                      [
+                        "config-logging",
+                        "config-observability",
+                        "config-artifact-bucket",
+                        "config-artifact-pvc",
+                        "feature-flags",
+                        "config-leader-election",
+                        "config-registry-cert",
+                      ]
+                  - apiGroups: ["policy"]
+                    resources: ["podsecuritypolicies"]
+                    resourceNames: ["tekton-pipelines"]
+                    verbs: ["use"]
+          remediationAction: enforce
+          severity: high
+    - objectDefinition:
+        apiVersion: policy.open-cluster-management.io/v1
+        kind: ConfigurationPolicy
+        metadata:
+          name: policy-role-tekton-pipelines-webhook
+        spec:
+          namespaceSelector:
+            exclude:
+              - kube-*
+            include:
+              - "*"
+          object-templates:
+            - complianceType: musthave
+              objectDefinition:
+                kind: Role
+                apiVersion: rbac.authorization.k8s.io/v1
+                metadata:
+                  name: tekton-pipelines-webhook
+                  namespace: tekton-pipelines
+                  labels:
+                    app.kubernetes.io/component: webhook
+                    app.kubernetes.io/instance: default
+                    app.kubernetes.io/part-of: tekton-pipelines
+                rules:
+                  - apiGroups: [""]
+                    resources: ["configmaps"]
+                    verbs: ["list", "watch"]
+                  # The webhook needs access to these configmaps for logging information.
+                  - apiGroups: [""]
+                    resources: ["configmaps"]
+                    verbs: ["get"]
+                    resourceNames:
+                      [
+                        "config-logging",
+                        "config-observability",
+                        "config-leader-election",
+                      ]
+                  - apiGroups: [""]
+                    resources: ["secrets"]
+                    verbs: ["list", "watch"]
+                  # The webhook daemon makes a reconciliation loop on webhook-certs. Whenever
+                  # the secret changes it updates the webhook configurations with the certificates
+                  # stored in the secret.
+                  - apiGroups: [""]
+                    resources: ["secrets"]
+                    verbs: ["get", "update"]
+                    resourceNames: ["webhook-certs"]
+                  - apiGroups: ["policy"]
+                    resources: ["podsecuritypolicies"]
+                    resourceNames: ["tekton-pipelines"]
+                    verbs: ["use"]
+          remediationAction: enforce
+          severity: high
+    - objectDefinition:
+        apiVersion: policy.open-cluster-management.io/v1
+        kind: ConfigurationPolicy
+        metadata:
+          name: policy-role-tekton-pipelines-leader-election
+        spec:
+          namespaceSelector:
+            exclude:
+              - kube-*
+            include:
+              - "*"
+          object-templates:
+            - complianceType: musthave
+              objectDefinition:
+                kind: Role
+                apiVersion: rbac.authorization.k8s.io/v1
+                metadata:
+                  name: tekton-pipelines-leader-election
+                  namespace: tekton-pipelines
+                  labels:
+                    app.kubernetes.io/instance: default
+                    app.kubernetes.io/part-of: tekton-pipelines
+                rules:
+                  # We uses leases for leaderelection
+                  - apiGroups: ["coordination.k8s.io"]
+                    resources: ["leases"]
+                    verbs:
+                      [
+                        "get",
+                        "list",
+                        "create",
+                        "update",
+                        "delete",
+                        "patch",
+                        "watch",
+                      ]
+          remediationAction: enforce
+          severity: high
+---
+apiVersion: policy.open-cluster-management.io/v1
+kind: PlacementBinding
+metadata:
+  name: binding-tekton-roles
+  namespace: cluster-policies
+placementRef:
+  name: placementrule-kubernetes
+  kind: PlacementRule
+  apiGroup: apps.open-cluster-management.io
+subjects:
+  - name: policy-tekton-roles
+    kind: Policy
+    apiGroup: policy.open-cluster-management.io
