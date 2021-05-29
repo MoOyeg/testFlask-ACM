@@ -1,0 +1,254 @@
+apiVersion: policy.open-cluster-management.io/v1
+kind: Policy
+metadata:
+  name: policy-tekton-rolebind
+  namespace: cluster-policies
+  annotations:
+    apps.open-cluster-management.io/reconcile-option: merge
+  generation: 1
+spec:
+  disabled: false
+  policy-templates:
+    - objectDefinition:
+        apiVersion: policy.open-cluster-management.io/v1
+        kind: ConfigurationPolicy
+        metadata:
+          name: policy-clusterolebind-pipelines-controller-cluster-access
+        spec:
+          namespaceSelector:
+            exclude:
+              - kube-*
+            include:
+              - "*"
+          object-templates:
+            - complianceType: musthave
+              objectDefinition:
+                apiVersion: rbac.authorization.k8s.io/v1
+                kind: ClusterRoleBinding
+                metadata:
+                  name: tekton-pipelines-controller-cluster-access
+                  labels:
+                    app.kubernetes.io/component: controller
+                    app.kubernetes.io/instance: default
+                    app.kubernetes.io/part-of: tekton-pipelines
+                subjects:
+                  - kind: ServiceAccount
+                    name: tekton-pipelines-controller
+                    namespace: tekton-pipelines
+                roleRef:
+                  kind: ClusterRole
+                  name: tekton-pipelines-controller-cluster-access
+                  apiGroup: rbac.authorization.k8s.io
+          remediationAction: enforce
+          severity: high
+    - objectDefinition:
+        apiVersion: policy.open-cluster-management.io/v1
+        kind: ConfigurationPolicy
+        metadata:
+          name: policy-clusterolebind-pipelines-controller-tenant-access
+        spec:
+          namespaceSelector:
+            exclude:
+              - kube-*
+            include:
+              - "*"
+          object-templates:
+            - complianceType: musthave
+              objectDefinition:
+                apiVersion: rbac.authorization.k8s.io/v1
+                kind: ClusterRoleBinding
+                metadata:
+                  name: tekton-pipelines-controller-tenant-access
+                  labels:
+                    app.kubernetes.io/component: controller
+                    app.kubernetes.io/instance: default
+                    app.kubernetes.io/part-of: tekton-pipelines
+                subjects:
+                  - kind: ServiceAccount
+                    name: tekton-pipelines-controller
+                    namespace: tekton-pipelines
+                roleRef:
+                  kind: ClusterRole
+                  name: tekton-pipelines-controller-tenant-access
+                  apiGroup: rbac.authorization.k8s.io
+          remediationAction: enforce
+          severity: high
+    - objectDefinition:
+        apiVersion: policy.open-cluster-management.io/v1
+        kind: ConfigurationPolicy
+        metadata:
+          name: policy-clusterolebind-pipelines-webhook-cluster-access
+        spec:
+          namespaceSelector:
+            exclude:
+              - kube-*
+            include:
+              - "*"
+          object-templates:
+            - complianceType: musthave
+              objectDefinition:
+                apiVersion: rbac.authorization.k8s.io/v1
+                kind: ClusterRoleBinding
+                metadata:
+                  name: tekton-pipelines-webhook-cluster-access
+                  labels:
+                    app.kubernetes.io/component: webhook
+                    app.kubernetes.io/instance: default
+                    app.kubernetes.io/part-of: tekton-pipelines
+                subjects:
+                  - kind: ServiceAccount
+                    name: tekton-pipelines-webhook
+                    namespace: tekton-pipelines
+                roleRef:
+                  kind: ClusterRole
+                  name: tekton-pipelines-webhook-cluster-access
+                  apiGroup: rbac.authorization.k8s.io
+          remediationAction: enforce
+          severity: high
+    - objectDefinition:
+        apiVersion: policy.open-cluster-management.io/v1
+        kind: ConfigurationPolicy
+        metadata:
+          name: policy-rolebind-pipelines-controller
+        spec:
+          namespaceSelector:
+            exclude:
+              - kube-*
+            include:
+              - "*"
+          object-templates:
+            - complianceType: musthave
+              objectDefinition:
+                apiVersion: rbac.authorization.k8s.io/v1beta1
+                kind: RoleBinding
+                metadata:
+                  name: tekton-pipelines-controller
+                  namespace: tekton-pipelines
+                  labels:
+                    app.kubernetes.io/component: controller
+                    app.kubernetes.io/instance: default
+                    app.kubernetes.io/part-of: tekton-pipelines
+                subjects:
+                  - kind: ServiceAccount
+                    name: tekton-pipelines-controller
+                    namespace: tekton-pipelines
+                roleRef:
+                  kind: Role
+                  name: tekton-pipelines-controller
+                  apiGroup: rbac.authorization.k8s.io
+          remediationAction: enforce
+          severity: high
+    - objectDefinition:
+        apiVersion: policy.open-cluster-management.io/v1
+        kind: ConfigurationPolicy
+        metadata:
+          name: policy-rolebind-pipelines-webhook
+        spec:
+          namespaceSelector:
+            exclude:
+              - kube-*
+            include:
+              - "*"
+          object-templates:
+            - complianceType: musthave
+              objectDefinition:
+                apiVersion: rbac.authorization.k8s.io/v1beta1
+                kind: RoleBinding
+                metadata:
+                  name: tekton-pipelines-webhook
+                  namespace: tekton-pipelines
+                  labels:
+                    app.kubernetes.io/component: webhook
+                    app.kubernetes.io/instance: default
+                    app.kubernetes.io/part-of: tekton-pipelines
+                subjects:
+                  - kind: ServiceAccount
+                    name: tekton-pipelines-webhook
+                    namespace: tekton-pipelines
+                roleRef:
+                  kind: Role
+                  name: tekton-pipelines-webhook
+                  apiGroup: rbac.authorization.k8s.io
+          remediationAction: enforce
+          severity: high
+    - objectDefinition:
+        apiVersion: policy.open-cluster-management.io/v1
+        kind: ConfigurationPolicy
+        metadata:
+          name: policy-rolebind-pipelines-controller-leaderelection
+        spec:
+          namespaceSelector:
+            exclude:
+              - kube-*
+            include:
+              - "*"
+          object-templates:
+            - complianceType: musthave
+              objectDefinition:
+                apiVersion: rbac.authorization.k8s.io/v1beta1
+                kind: RoleBinding
+                metadata:
+                  name: tekton-pipelines-controller-leaderelection
+                  namespace: tekton-pipelines
+                  labels:
+                    app.kubernetes.io/component: controller
+                    app.kubernetes.io/instance: default
+                    app.kubernetes.io/part-of: tekton-pipelines
+                subjects:
+                  - kind: ServiceAccount
+                    name: tekton-pipelines-controller
+                    namespace: tekton-pipelines
+                roleRef:
+                  kind: Role
+                  name: tekton-pipelines-leader-election
+                  apiGroup: rbac.authorization.k8s.io
+          remediationAction: enforce
+          severity: high
+    - objectDefinition:
+        apiVersion: policy.open-cluster-management.io/v1
+        kind: ConfigurationPolicy
+        metadata:
+          name: policy-rolebind-pipelines-webhook-leaderelection
+        spec:
+          namespaceSelector:
+            exclude:
+              - kube-*
+            include:
+              - "*"
+          object-templates:
+            - complianceType: musthave
+              objectDefinition:
+                apiVersion: rbac.authorization.k8s.io/v1beta1
+                kind: RoleBinding
+                metadata:
+                  name: tekton-pipelines-webhook-leaderelection
+                  namespace: tekton-pipelines
+                  labels:
+                    app.kubernetes.io/component: webhook
+                    app.kubernetes.io/instance: default
+                    app.kubernetes.io/part-of: tekton-pipelines
+                subjects:
+                  - kind: ServiceAccount
+                    name: tekton-pipelines-webhook
+                    namespace: tekton-pipelines
+                roleRef:
+                  kind: Role
+                  name: tekton-pipelines-leader-election
+                  apiGroup: rbac.authorization.k8s.io
+          remediationAction: enforce
+          severity: high
+  remediationAction: enforce
+---
+apiVersion: policy.open-cluster-management.io/v1
+kind: PlacementBinding
+metadata:
+  name: binding-tekton-rolebind
+  namespace: cluster-policies
+placementRef:
+  name: placementrule-kubernetes
+  kind: PlacementRule
+  apiGroup: apps.open-cluster-management.io
+subjects:
+  - name: policy-tekton-rolebind
+    kind: Policy
+    apiGroup: policy.open-cluster-management.io

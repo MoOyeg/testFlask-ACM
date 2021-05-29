@@ -234,6 +234,88 @@ spec:
                     verbs: ["use"]
           remediationAction: enforce
           severity: high
+    - objectDefinition:
+        apiVersion: policy.open-cluster-management.io/v1
+        kind: ConfigurationPolicy
+        metadata:
+          name: policy-tekton-aggregate-edit
+        spec:
+          namespaceSelector:
+            exclude:
+              - kube-*
+            include:
+              - "*"
+          object-templates:
+            - complianceType: musthave
+              objectDefinition:
+                apiVersion: rbac.authorization.k8s.io/v1
+                kind: ClusterRole
+                metadata:
+                  name: tekton-aggregate-edit
+                  labels:
+                    app.kubernetes.io/instance: default
+                    app.kubernetes.io/part-of: tekton-pipelines
+                    rbac.authorization.k8s.io/aggregate-to-edit: "true"
+                    rbac.authorization.k8s.io/aggregate-to-admin: "true"
+                rules:
+                  - apiGroups:
+                      - tekton.dev
+                    resources:
+                      - tasks
+                      - taskruns
+                      - pipelines
+                      - pipelineruns
+                      - pipelineresources
+                      - conditions
+                    verbs:
+                      - create
+                      - delete
+                      - deletecollection
+                      - get
+                      - list
+                      - patch
+                      - update
+                      - watch
+          remediationAction: enforce
+          severity: high
+    - objectDefinition:
+        apiVersion: policy.open-cluster-management.io/v1
+        kind: ConfigurationPolicy
+        metadata:
+          name: policy-clusterrole-tekton-aggregate-view
+        spec:
+          namespaceSelector:
+            exclude:
+              - kube-*
+            include:
+              - "*"
+          object-templates:
+            - complianceType: musthave
+              objectDefinition:
+                apiVersion: rbac.authorization.k8s.io/v1
+                kind: ClusterRole
+                metadata:
+                  name: tekton-aggregate-view
+                  labels:
+                    app.kubernetes.io/instance: default
+                    app.kubernetes.io/part-of: tekton-pipelines
+                    rbac.authorization.k8s.io/aggregate-to-view: "true"
+                rules:
+                  - apiGroups:
+                      - tekton.dev
+                    resources:
+                      - tasks
+                      - taskruns
+                      - pipelines
+                      - pipelineruns
+                      - pipelineresources
+                      - conditions
+                    verbs:
+                      - get
+                      - list
+                      - watch
+          remediationAction: enforce
+          severity: high
   remediationAction: enforce
 ---
 apiVersion: policy.open-cluster-management.io/v1
